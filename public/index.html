@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Bot Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-robot text-blue-600 text-3xl"></i>
+                    <h1 class="text-2xl font-bold text-gray-800">Facebook Bot Manager</h1>
+                </div>
+                <div id="botStatus" class="hidden">
+                    <span class="px-4 py-2 rounded-full text-sm font-semibold">
+                        <i class="fas fa-circle text-red-500"></i>
+                        <span class="status-text ml-2">Offline</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Bot Configuration</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Appstate JSON
+                        <span class="text-xs text-gray-500 ml-1">(Required)</span>
+                    </label>
+                    <textarea 
+                        id="appstate" 
+                        rows="8" 
+                        class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+                        placeholder="Paste your appstate JSON here..."></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Command Prefix</label>
+                        <input 
+                            type="text" 
+                            id="prefix" 
+                            value="!" 
+                            class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Admin UID (Optional)</label>
+                        <input 
+                            type="text" 
+                            id="adminUID" 
+                            class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+                            placeholder="Your Facebook UID">
+                    </div>
+                </div>
+                <div>
+                    <button 
+                        id="loginBtn"
+                        class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        Start Bot
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bot Controls (Hidden until logged in) -->
+        <div id="botControls" class="hidden bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Bot Controls</h2>
+                <button 
+                    id="logoutBtn"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors">
+                    Stop Bot
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold mb-2">Bot Info</h3>
+                    <p id="botUID" class="text-sm text-gray-600">UID: -</p>
+                    <p id="uptime" class="text-sm text-gray-600">Uptime: -</p>
+                    <p id="commandCount" class="text-sm text-gray-600">Commands: -</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Bot Logs</h2>
+                <button 
+                    id="clearLogs"
+                    class="text-sm text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <i class="fas fa-trash-alt mr-1"></i> Clear
+                </button>
+            </div>
+            <div id="logs" class="h-96 overflow-y-auto font-mono text-sm bg-gray-50 p-4 rounded-lg"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = {
+                loginBtn: document.getElementById('loginBtn'),
+                logoutBtn: document.getElementById('logoutBtn'),
+                botStatus: document.getElementById('botStatus'),
+                botControls: document.getElementById('botControls'),
+                logsDiv: document.getElementById('logs'),
+                clearLogs: document.getElementById('clearLogs'),
+                statusText: document.querySelector('.status-text')
+            };
+
+            let isLoggedIn = false;
+
+            // Helper to add log entry
+            function addLogEntry(msg, type = 'info') {
+                const colors = {
+                    info: 'text-blue-600',
+                    error: 'text-red-600',
+                    success: 'text-green-600'
+                };
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${colors[type]} mb-1`;
+                entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                elements.logsDiv.insertBefore(entry, elements.logsDiv.firstChild);
+            }
+
+            // Login handler
+            elements.loginBtn.addEventListener('click', async () => {
+                const appstate = document.getElementById('appstate').value;
+                const prefix = document.getElementById('prefix').value;
+                const adminUID = document.getElementById('adminUID').value;
+
+                if (!appstate) {
+                    addLogEntry('Appstate is required!', 'error');
+                    return;
+                }
+
+                try {
+                    elements.loginBtn.disabled = true;
+                    elements.loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Connecting...';
+
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ appstate, prefix, adminUID })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        isLoggedIn = true;
+                        elements.botStatus.classList.remove('hidden');
+                        elements.statusText.innerHTML = `Online (${data.botID})`;
+                        elements.statusText.previousElementSibling.classList.remove('text-red-500');
+                        elements.statusText.previousElementSibling.classList.add('text-green-500');
+                        elements.botControls.classList.remove('hidden');
+                        elements.loginBtn.innerHTML = 'Connected';
+                        elements.loginBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                        addLogEntry('Bot connected successfully!', 'success');
+                        updateBotInfo();
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    elements.loginBtn.disabled = false;
+                    elements.loginBtn.innerHTML = 'Start Bot';
+                    addLogEntry(`Login failed: ${error.message}`, 'error');
+                }
+            });
+
+            // Logout handler
+            elements.logoutBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/logout', {
+                        method: 'POST'
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        isLoggedIn = false;
+                        elements.statusText.innerHTML = 'Offline';
+                        elements.statusText.previousElementSibling.classList.remove('text-green-500');
+                        elements.statusText.previousElementSibling.classList.add('text-red-500');
+                        elements.botControls.classList.add('hidden');
+                        elements.loginBtn.disabled = false;
+                        elements.loginBtn.innerHTML = 'Start Bot';
+                        elements.loginBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                        elements.loginBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                        addLogEntry('Bot disconnected', 'info');
+                    }
+                } catch (error) {
+                    addLogEntry(`Logout failed: ${error.message}`, 'error');
+                }
+            });
+
+            // Clear logs
+            elements.clearLogs.addEventListener('click', () => {
+                elements.logsDiv.innerHTML = '';
+            });
+
+            // Update bot info
+            async function updateBotInfo() {
+                if (!isLoggedIn) return;
+
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+
+                    document.getElementById('uptime').textContent = `Uptime: ${Math.floor(data.uptime)}s`;
+                    document.getElementById('commandCount').textContent = `Commands: ${data.commands}`;
+                } catch (error) {
+                    console.error('Failed to update bot info:', error);
+                }
+            }
+
+            // Update bot info every 5 seconds
+            setInterval(updateBotInfo, 5000);
+        });
+    </script>
+</body>
+</html>

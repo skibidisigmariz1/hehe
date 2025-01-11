@@ -1,0 +1,13 @@
+{
+    "port": 3000,
+    "maxLogs": 1000,
+    "defaultPrefix": "!",
+    "commands": {
+        "path": "./commands",
+        "defaultCooldown": 3000
+    },
+    "security": {
+        "maxLoginAttempts": 3,
+        "loginTimeout": 300000
+    }
+}
