@@ -1,5 +1,5 @@
 const express = require('express');
-const login = require('skibidi-fca-v2');
+const login = require('ws3-fca');
 const fs = require('fs');
 const path = require('path');
 const app = express();
