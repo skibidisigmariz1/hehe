@@ -1,51 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AUTO</title>
+    <title>AUTOBOT</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .dark {
-            background-color: #1a1a1a;
-            color: #ffffff;
-        }
-        .dark .bg-white {
-            background-color: #2d2d2d;
-        }
-        .dark .text-gray-700, .dark .text-gray-800 {
-            color: #e0e0e0;
-        }
-        .dark .text-gray-600 {
-            color: #b0b0b0;
-        }
-        .dark .bg-gray-50 {
-            background-color: #3d3d3d;
-        }
-        .dark .border {
-            border-color: #404040;
-        }
-        .tab-active {
-            border-bottom: 2px solid #3b82f6;
-        }
-    </style>
 </head>
-<body class="bg-gray-100 min-h-screen transition-colors duration-200">
-    <div class="fixed top-4 right-4 flex space-x-2">
-        <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-            <i class="fas fa-moon dark:hidden"></i>
-            <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
-        </button>
-    </div>
-
+<body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-robot text-blue-600 text-3xl"></i>
-                    <h1 class="text-2xl font-bold text-gray-800">Facebook Bot Manager</h1>
+                    <h1 class="text-2xl font-bold text-gray-800">Facebook AutoBot</h1>
                 </div>
                 <div id="botStatus" class="hidden">
                     <span class="px-4 py-2 rounded-full text-sm font-semibold">
@@ -56,29 +25,40 @@
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <div class="flex space-x-4 border-b mb-4">
-                <button class="tab-button tab-active px-4 py-2" data-tab="login">Login</button>
-                <button class="tab-button px-4 py-2" data-tab="config">Config</button>
-                <button class="tab-button px-4 py-2" data-tab="permissions">Permissions</button>
-                <button class="tab-button px-4 py-2" data-tab="commands">Commands</button>
-            </div>
-
-            <!-- Login Tab -->
-            <div id="loginTab" class="tab-content">
-                <div class="space-y-4">
+        <!-- Login Form -->
+        <div id="loginForm" class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Bot Configuration</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Appstate JSON
+                        <span class="text-xs text-gray-500 ml-1">(Required)</span>
+                    </label>
+                    <textarea 
+                        id="appstate" 
+                        rows="8" 
+                        class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+                        placeholder="Paste your appstate JSON here..."></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Appstate JSON
-                            <span class="text-xs text-gray-500 ml-1">(Required)</span>
-                        </label>
-                        <textarea 
-                            id="appstate" 
-                            rows="8" 
-                            class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
-                            placeholder="Paste your appstate JSON here..."></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Prefix</label>
+                        <input 
+                            type="text" 
+                            id="prefix" 
+                            value="!" 
+                            class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500">
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Admin UID (Optional)</label>
+                        <input 
+                            type="text" 
+                            id="adminUID" 
+                            class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+                            placeholder="Your Facebook UID">
+                    </div>
+                </div>
+                <div>
                     <button 
                         id="loginBtn"
                         class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
@@ -86,116 +66,24 @@
                     </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Config Tab -->
-            <div id="configTab" class="tab-content hidden">
-                <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Bot Name</label>
-                            <input type="text" id="botName" class="w-full px-3 py-2 border rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Prefix</label>
-                            <input type="text" id="prefix" class="w-full px-3 py-2 border rounded-lg">
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Language</label>
-                            <select id="language" class="w-full px-3 py-2 border rounded-lg">
-                                <option value="en">English</option>
-                                <option value="vi">Vietnamese</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
-                            <select id="timezone" class="w-full px-3 py-2 border rounded-lg">
-                                <option value="Asia/Ho_Chi_Minh">Asia/Ho_Chi_Minh</option>
-                                <option value="UTC">UTC</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <h3 class="font-semibold">Auto Restart Settings</h3>
-                        <div class="flex items-center space-x-4">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" id="autoRestartEnabled" class="form-checkbox">
-                                <span class="ml-2">Enable Auto Restart</span>
-                            </label>
-                            <input type="number" id="autoRestartInterval" class="w-20 px-2 py-1 border rounded" min="1">
-                            <select id="autoRestartUnit" class="px-2 py-1 border rounded">
-                                <option value="hours">Hours</option>
-                                <option value="days">Days</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <h3 class="font-semibold">Command Settings</h3>
-                        <div class="flex flex-wrap gap-4">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" id="autoReact" class="form-checkbox">
-                                <span class="ml-2">Auto React</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" id="allowSpam" class="form-checkbox">
-                                <span class="ml-2">Allow Spam</span>
-                            </label>
-                            <div class="flex items-center">
-                                <span class="mr-2">Cooldown:</span>
-                                <input type="number" id="cooldown" class="w-20 px-2 py-1 border rounded" min="0">
-                                <span class="ml-1">seconds</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button id="saveConfig" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                        Save Configuration
-                    </button>
-                </div>
+        <!-- Bot Controls (Hidden until logged in) -->
+        <div id="botControls" class="hidden bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Bot Controls</h2>
+                <button 
+                    id="logoutBtn"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors">
+                    Stop Bot
+                </button>
             </div>
-
-            <!-- Permissions Tab -->
-            <div id="permissionsTab" class="tab-content hidden">
-                <div class="space-y-4">
-                    <div class="flex space-x-4">
-                        <input type="text" id="userIdInput" placeholder="User ID" class="flex-1 px-3 py-2 border rounded-lg">
-                        <select id="permissionType" class="px-3 py-2 border rounded-lg">
-                            <option value="superAdmin">Super Admin</option>
-                            <option value="adminBot">Admin</option>
-                        </select>
-                        <button id="addPermission" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            Add User
-                        </button>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <h3 class="font-semibold mb-2">Super Admins</h3>
-                            <div id="superAdminList" class="space-y-2">
-                                <!-- Super admins will be listed here -->
-                            </div>
-                        </div>
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <h3 class="font-semibold mb-2">Admins</h3>
-                            <div id="adminList" class="space-y-2">
-                                <!-- Admins will be listed here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Commands Tab -->
-            <div id="commandsTab" class="tab-content hidden">
-                <div class="space-y-4">
-                    <input type="text" id="commandSearch" placeholder="Search commands..." class="w-full px-3 py-2 border rounded-lg">
-                    <div id="commandsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Commands will be listed here -->
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-semibold mb-2">Bot Info</h3>
+                    <p id="botUID" class="text-sm text-gray-600">UID: -</p>
+                    <p id="uptime" class="text-sm text-gray-600">Uptime: -</p>
+                    <p id="commandCount" class="text-sm text-gray-600">Commands: -</p>
                 </div>
             </div>
         </div>
@@ -204,7 +92,9 @@
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold">Bot Logs</h2>
-                <button id="clearLogs" class="text-sm text-gray-500 hover:text-gray-700 focus:outline-none">
+                <button 
+                    id="clearLogs"
+                    class="text-sm text-gray-500 hover:text-gray-700 focus:outline-none">
                     <i class="fas fa-trash-alt mr-1"></i> Clear
                 </button>
             </div>
@@ -214,74 +104,123 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Tab switching
-            const tabs = document.querySelectorAll('.tab-button');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remove active class from all tabs
-                    tabs.forEach(t => t.classList.remove('tab-active'));
-                    // Add active class to clicked tab
-                    tab.classList.add('tab-active');
-                    
-                    // Hide all tab content
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.add('hidden');
-                    });
-                    // Show selected tab content
-                    document.getElementById(`${tab.dataset.tab}Tab`).classList.remove('hidden');
-                });
-            });
+            const elements = {
+                loginBtn: document.getElementById('loginBtn'),
+                logoutBtn: document.getElementById('logoutBtn'),
+                botStatus: document.getElementById('botStatus'),
+                botControls: document.getElementById('botControls'),
+                logsDiv: document.getElementById('logs'),
+                clearLogs: document.getElementById('clearLogs'),
+                statusText: document.querySelector('.status-text')
+            };
 
-            // Dark mode toggle
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            const html = document.documentElement;
-            
-            darkModeToggle.addEventListener('click', () => {
-                html.classList.toggle('dark');
-                localStorage.setItem('darkMode', html.classList.contains('dark'));
-            });
+            let isLoggedIn = false;
 
-            // Check for saved dark mode preference
-            if (localStorage.getItem('darkMode') === 'true') {
-                html.classList.add('dark');
+            // Helper to add log entry
+            function addLogEntry(msg, type = 'info') {
+                const colors = {
+                    info: 'text-blue-600',
+                    error: 'text-red-600',
+                    success: 'text-green-600'
+                };
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${colors[type]} mb-1`;
+                entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                elements.logsDiv.insertBefore(entry, elements.logsDiv.firstChild);
             }
 
-            // Save config
-            document.getElementById('saveConfig').addEventListener('click', async () => {
-                const config = {
-                    botName: document.getElementById('botName').value,
-                    prefix: document.getElementById('prefix').value,
-                    language: document.getElementById('language').value,
-                    timezone: document.getElementById('timezone').value,
-                    autoRestart: {
-                        enabled: document.getElementById('autoRestartEnabled').checked,
-                        interval: parseInt(document.getElementById('autoRestartInterval').value),
-                        timeUnit: document.getElementById('autoRestartUnit').value
-                    },
-                    commandSettings: {
-                        autoReact: document.getElementById('autoReact').checked,
-                        allowSpam: document.getElementById('allowSpam').checked,
-                        cooldown: parseInt(document.getElementById('cooldown').value)
-                    }
-                };
+            // Login handler
+            elements.loginBtn.addEventListener('click', async () => {
+                const appstate = document.getElementById('appstate').value;
+                const prefix = document.getElementById('prefix').value;
+                const adminUID = document.getElementById('adminUID').value;
+
+                if (!appstate) {
+                    addLogEntry('Appstate is required!', 'error');
+                    return;
+                }
 
                 try {
-                    const response = await fetch('/api/config', {
+                    elements.loginBtn.disabled = true;
+                    elements.loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Connecting...';
+
+                    const response = await fetch('/api/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(config)
+                        body: JSON.stringify({ appstate, prefix, adminUID })
                     });
-                    
+
                     const data = await response.json();
+
                     if (data.success) {
-                        addLogEntry('Configuration saved successfully', 'success');
+                        isLoggedIn = true;
+                        elements.botStatus.classList.remove('hidden');
+                        elements.statusText.innerHTML = `Online (${data.botID})`;
+                        elements.statusText.previousElementSibling.classList.remove('text-red-500');
+                        elements.statusText.previousElementSibling.classList.add('text-green-500');
+                        elements.botControls.classList.remove('hidden');
+                        elements.loginBtn.innerHTML = 'Connected';
+                        elements.loginBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                        addLogEntry('Bot connected successfully!', 'success');
+                        updateBotInfo();
+                    } else {
+                        throw new Error(data.error);
                     }
                 } catch (error) {
-                    addLogEntry(`Failed to save configuration: ${error.message}`, 'error');
+                    elements.loginBtn.disabled = false;
+                    elements.loginBtn.innerHTML = 'Start Bot';
+                    addLogEntry(`Login failed: ${error.message}`, 'error');
                 }
             });
 
-            // Add your existing event listeners here...
+            // Logout handler
+            elements.logoutBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/logout', {
+                        method: 'POST'
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        isLoggedIn = false;
+                        elements.statusText.innerHTML = 'Offline';
+                        elements.statusText.previousElementSibling.classList.remove('text-green-500');
+                        elements.statusText.previousElementSibling.classList.add('text-red-500');
+                        elements.botControls.classList.add('hidden');
+                        elements.loginBtn.disabled = false;
+                        elements.loginBtn.innerHTML = 'Start Bot';
+                        elements.loginBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                        elements.loginBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                        addLogEntry('Bot disconnected', 'info');
+                    }
+                } catch (error) {
+                    addLogEntry(`Logout failed: ${error.message}`, 'error');
+                }
+            });
+
+            // Clear logs
+            elements.clearLogs.addEventListener('click', () => {
+                elements.logsDiv.innerHTML = '';
+            });
+
+            // Update bot info
+            async function updateBotInfo() {
+                if (!isLoggedIn) return;
+
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+
+                    document.getElementById('uptime').textContent = `Uptime: ${Math.floor(data.uptime)}s`;
+                    document.getElementById('commandCount').textContent = `Commands: ${data.commands}`;
+                } catch (error) {
+                    console.error('Failed to update bot info:', error);
+                }
+            }
+
+            // Update bot info every 5 seconds
+            setInterval(updateBotInfo, 5000);
         });
     </script>
 </body>
